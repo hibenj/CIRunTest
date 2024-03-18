@@ -24,13 +24,22 @@ jobs:
         git checkout HEAD~1
         cp cost.txt cost_master.txt
         git checkout -
-            
+                
         PR_COST_FILE="cost.txt"
         MASTER_COST_FILE="cost_master.txt"
+        
+        rm -f cost_tmp.txt
+        touch cost_tmp.txt
     
         PR_COST_ARR=($(cat "$PR_COST_FILE"))
         MASTER_COST_ARR=($(cat "$MASTER_COST_FILE"))
     
         for i in ${!PR_COST_ARR[@]}; do
-            echo "Line $((i+1)): PR_COST_FILE=${PR_COST_ARR[$i]}, MASTER_COST_FILE=${MASTER_COST_ARR[$i]}"
+            if [ ${PR_COST_ARR[$i]} -lt ${MASTER_COST_ARR[$i]} ]; then
+                echo ${PR_COST_ARR[$i]} >> cost_tmp.txt
+            else
+                echo ${MASTER_COST_ARR[$i]} >> cost_tmp.txt
+            fi
         done
+    
+        mv cost_tmp.txt cost.txt
