@@ -28,21 +28,26 @@ jobs:
         PR_COST_FILE="cost.txt"
         MASTER_COST_FILE="cost_master.txt"
 
-        IFS=$'\n' read -r -a PR_COST_ARR <<< $(cat "$PR_COST_FILE")
-        IFS=$'\n' read -r -a MASTER_COST_ARR <<< $(cat "$MASTER_COST_FILE")
+        # Read the cost from PR_COST_FILE and MASTER_COST_FILE line by line.
+        PR_COST_ARR=($(cat "$PR_COST_FILE"))
+        MASTER_COST_ARR=($(cat "$MASTER_COST_FILE"))
 
         for i in $(seq 0 $((${#PR_COST_ARR[@]}-1))); do
+            # Only update cost.txt at line i+1 if cost in PR is less than the current cost
             if [ ${PR_COST_ARR[$i]} -lt ${MASTER_COST_ARR[$i]} ]; then
                 echo "Improvement detected for entry $((i+1)). Updating cost.txt."
+                # Use sed command to replace the line with new cost
                 sed -i "$((i+1))c${PR_COST_ARR[$i]}" "$MASTER_COST_FILE"
             fi
         done
 
     - name: Commit and push if needed
       run: |
-        mv cost_master.txt cost.txt
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
+        mv cost_master.txt cost.txt
         git add cost.txt
-        git diff --quiet && git diff --staged --quiet || git commit -m 'Update cost.txt after cost improvement'
-        git push origin HEAD:master
+        if ! git diff --quiet && ! git diff --staged --quiet; then
+          git commit -m 'Update cost.txt after cost improvement'
+          git push origin HEAD:master
+        fi
