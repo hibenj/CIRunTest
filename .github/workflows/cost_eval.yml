@@ -24,33 +24,13 @@ jobs:
         git checkout HEAD~1
         cp cost.txt cost_master.txt
         git checkout -
-        
+            
         PR_COST_FILE="cost.txt"
         MASTER_COST_FILE="cost_master.txt"
-        
-        rm -f cost_temp.txt
-        touch cost_temp.txt
-
+    
         PR_COST_ARR=($(cat "$PR_COST_FILE"))
         MASTER_COST_ARR=($(cat "$MASTER_COST_FILE"))
-
+    
         for i in ${!PR_COST_ARR[@]}; do
-            if [ ${PR_COST_ARR[$i]} -lt ${MASTER_COST_ARR[$i]} ]; then
-                echo "Improvement detected for entry $((i+1)). Updating cost.txt."
-                echo ${PR_COST_ARR[$i]} >> cost_temp.txt
-            else
-                echo ${MASTER_COST_ARR[$i]} >> cost_temp.txt
-            fi
+            echo "Line $((i+1)): PR_COST_FILE=${PR_COST_ARR[$i]}, MASTER_COST_FILE=${MASTER_COST_ARR[$i]}"
         done
-
-        mv cost_temp.txt cost.txt
-
-    - name: Commit and push if needed
-      run: |
-        git config --global user.name 'GitHub Action'
-        git config --global user.email 'action@github.com'
-        git add cost.txt
-        if ! git diff --quiet && ! git diff --staged --quiet; then
-          git commit -m 'Update cost.txt after cost improvement'
-          git push origin HEAD:master
-        fi
