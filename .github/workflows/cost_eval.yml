@@ -24,7 +24,7 @@ jobs:
         git checkout HEAD~1
         cp cost.txt cost_master.txt
         git checkout -
-            
+          
         PR_COST_FILE="cost.txt"
         MASTER_COST_FILE="cost_master.txt"
         
@@ -37,14 +37,23 @@ jobs:
         for i in ${!PR_COST_ARR[@]}; do
             echo "Comparing line $((i+1)): PR=${PR_COST_ARR[$i]}, Master=${MASTER_COST_ARR[$i]}"
             if [ ${PR_COST_ARR[$i]} -lt ${MASTER_COST_ARR[$i]} ]; then
-                echo "Lower cost in PR. Writing ${PR_COST_ARR[$i]} to temp file."
+                echo "Lower cost on PR. Writing ${PR_COST_ARR[$i]} to temp file."
                 echo ${PR_COST_ARR[$i]} >> cost_tmp.txt
             else
                 echo "Lower cost in Master or costs are equal. Writing ${MASTER_COST_ARR[$i]} to temp file."
                 echo ${MASTER_COST_ARR[$i]} >> cost_tmp.txt
             fi
         done
-        echo "Finished writing to temp file. The contents of cost_tmp.txt are: $(cat cost_tmp.txt)"
     
+        echo "Final content of cost_temp.txt: $(cat cost_tmp.txt)"
+    
+    - name: Commit and push if needed
+      run: |
         mv cost_tmp.txt cost.txt
-        echo "Updated cost.txt with $(cat cost.txt)"
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add cost.txt
+        if ! git diff --quiet && ! git diff --staged --quiet; then
+          git commit -m 'Update cost.txt after cost improvement'
+          git push origin HEAD:master
+        fi
