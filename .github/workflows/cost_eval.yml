@@ -54,12 +54,11 @@ jobs:
         cat cost.txt
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
-        if ! git diff --quiet; then
-          git add cost.txt
-          echo "Changes have been detected. Committing and pushing..."
-          git commit -m 'Update cost.txt after cost improvement'
-          git push origin HEAD:master
-          echo "Finished pushing changes"
-        else
-          echo "No changes detected, skipping commit and push."
+       
+        git add cost.txt
+        echo "Changes have been detected. Committing and pushing..."
+        git commit -m 'Update cost.txt after cost improvement'
+        git push origin HEAD:master
+        echo "Finished pushing changes"
+       
         fi
