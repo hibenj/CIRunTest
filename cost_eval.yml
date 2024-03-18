@@ -1,0 +1,49 @@
+name: Cost Evaluation
+
+on:
+  push:
+    branches: [ 'master' ]
+  pull_request:
+    branches: [ 'master' ]
+
+jobs:
+  cost_evaluation_job:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 2  # depth should be 2 to have access to the last commit
+
+    - name: Run cost evaluation script
+      run: |
+        git checkout HEAD~1
+        cp cost.txt cost_main.txt
+        cp {1..100}.v vfiles_main/
+        git checkout -
+        
+        PR_COST_FILE="cost.txt"
+        MAIN_COST_FILE="cost_main.txt"
+
+        IFS=$'\n' read -r -a PR_COST_ARR <<< $(cat "$PR_COST_FILE")
+        IFS=$'\n' read -r -a MAIN_COST_ARR <<< $(cat "$MAIN_COST_FILE")
+
+        for i in $(seq 0 $((${#PR_COST_ARR[@]}-1))); do
+            if [ ${PR_COST_ARR[$i]} -lt ${MAIN_COST_ARR[$i]} ]; then
+                echo "Improvement detected for entry $((i+1)). Updating cost.txt and ${i}.v."
+                sed -i "$((i+1))c${PR_COST_ARR[$i]}" "$MAIN_COST_FILE"
+                cp "${i}.v" "vfiles_main/"
+            fi
+        done
+
+    - name: Commit and push if needed
+      run: |
+        mv cost_main.txt cost.txt
+        mv vfiles_main/* .
+        rm -r vfiles_main/
+        git config --global user.name 'GitHub Action'
+        git config --global user.email 'action@github.com'
+        git add cost.txt {1..100}.v
+        git diff --quiet && git diff --staged --quiet || git commit -m 'Update cost and .v files after cost improvement'
+        git push origin HEAD:main
