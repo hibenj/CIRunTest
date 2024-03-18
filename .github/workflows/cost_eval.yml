@@ -2,9 +2,9 @@ name: Cost Evaluation
 
 on:
   push:
-    branches: [ 'master' ]
+    branches: [ 'main' ]
   pull_request:
-    branches: [ 'master' ]
+    branches: [ 'main' ]
 
 jobs:
   cost_evaluation_job:
