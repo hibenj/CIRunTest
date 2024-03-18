@@ -47,6 +47,7 @@ jobs:
           mv cost_tmp.txt cost.txt
           rm -rf benchmarks_opt
           mv benchmarks_opt_master benchmarks_opt
+          rm cost_master.txt
 
       - name: Commit and push if needed
         run: |
