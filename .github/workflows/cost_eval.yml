@@ -36,7 +36,7 @@ jobs:
             echo "Comparing line $((i+1)): PR=${PR_COST_ARR[$i]}, Master=${MASTER_COST_ARR[$i]}"
             if [ ${PR_COST_ARR[$i]} -lt ${MASTER_COST_ARR[$i]} ]; then
               echo "Lower cost on PR. Writing ${PR_COST_ARR[$i]} to temp file and copying benchmark file."
-              cho ${PR_COST_ARR[$i]} >> cost_tmp.txt
+              echo ${PR_COST_ARR[$i]} >> cost_tmp.txt
               file_name=$(printf "ex%02d.v" "$((i))")
               cp benchmarks_opt/$file_name benchmarks_opt_master
             else
