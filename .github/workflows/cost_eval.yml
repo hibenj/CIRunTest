@@ -54,7 +54,7 @@ jobs:
         cat cost.txt
         git config --global user.name 'GitHub Action'
         git config --global user.email 'action@github.com'
-        if ! git diff --quiet && ! git diff --staged --quiet; then
+        if ! git diff --quiet; then
           git add cost.txt
           echo "Changes have been detected. Committing and pushing..."
           git commit -m 'Update cost.txt after cost improvement'
